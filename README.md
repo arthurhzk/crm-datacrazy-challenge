@@ -1,27 +1,38 @@
-Webhook Receiver Service
+# Webhook Receiver Service
 
-Serviço backend desenvolvido com NestJS + TypeScript para recebimento de webhooks públicos e persistência de eventos em MongoDB.
+Serviço backend desenvolvido com **NestJS + TypeScript** para recebimento de webhooks públicos e persistência de eventos em MongoDB.
 
-Tecnologias utilizadas
-Node.js
-TypeScript
-NestJS
-Prisma
-MongoDB
-Docker Compose
-Winston
-Objetivo
+---
+
+# Tecnologias utilizadas
+
+* Node.js
+* TypeScript
+* NestJS
+* Prisma
+* MongoDB
+* Docker Compose
+* Winston
+
+---
+
+# Objetivo
 
 A aplicação recebe eventos externos através de webhooks públicos e armazena os dados para posterior processamento.
 
 O projeto foi estruturado pensando em:
 
-organização
-manutenção
-escalabilidade
-legibilidade
-simplicidade
-Estrutura do projeto
+* organização
+* manutenção
+* escalabilidade
+* legibilidade
+* simplicidade
+
+---
+
+# Estrutura do projeto
+
+```bash
 src/
 ├── common/
 ├── modules/
@@ -41,58 +52,117 @@ src/
 
 prisma/
 └── schema.prisma
-Como executar o projeto
-Pré-requisitos
-Docker
-Docker Compose
-Node.js
-Variáveis de ambiente
+```
 
-Criar um arquivo .env:
+---
 
+# Como executar o projeto
+
+## Pré-requisitos
+
+* Docker
+* Docker Compose
+* Node.js
+* PNPM
+
+---
+
+# Variáveis de ambiente
+
+Crie um arquivo `.env` na raiz do projeto:
+
+```env
 PORT=3000
 
-DATABASE_URL=mongodb://admin:admin@localhost:27017/webhooks?authSource=admin
-Subindo o MongoDB
+DATABASE_URL="mongodb://admin:admin@localhost:27017/webhooks?authSource=admin"
+```
+
+---
+
+# Subindo o MongoDB
+
+```bash
 docker compose up -d
-Instalando dependências
+```
+
+---
+
+# Instalando dependências
+
+```bash
 pnpm install
-Gerando o Prisma Client
+```
+
+---
+
+# Gerando o Prisma Client
+
+```bash
 npx prisma generate
-Executando a aplicação
+```
+
+---
+
+# Executando a aplicação
+
+```bash
 pnpm run start:dev
+```
 
 Aplicação disponível em:
 
+```bash
 http://localhost:3000
-Endpoints
-Receber webhook
+```
+
+---
+
+# Endpoints
+
+## Receber webhook
+
+```http
 POST /webhooks/:source
+```
 
-Exemplo:
+### Exemplo
 
+```http
 POST /webhooks/shopify
+```
 
-Payload:
+### Payload
 
+```json
 {
   "event": "order.created",
   "data": {
     "id": 123
   }
 }
-Health Check
+```
+
+---
+
+## Health Check
+
+```http
 GET /health
+```
 
-Retorna:
+### Retorna
 
-status da aplicação
-status da conexão com MongoDB
-timestamp
-Estrutura do evento salvo
+* status da aplicação
+* status da conexão com MongoDB
+* timestamp
 
-Exemplo:
+---
 
+# Estrutura do evento salvo
+
+Exemplo de documento persistido no MongoDB:
+
+```json
 {
   "id": "uuid",
   "source": "shopify",
@@ -102,66 +172,104 @@ Exemplo:
   "status": "processed",
   "errorMessage": null
 }
-Decisões técnicas
-NestJS
+```
 
-NestJS foi escolhido por oferecer:
+---
 
-arquitetura modular
-injeção de dependência
-organização
-facilidade de manutenção
-escalabilidade
-MongoDB
+# Decisões técnicas
+
+## NestJS
+
+O NestJS foi escolhido por oferecer:
+
+* arquitetura modular
+* injeção de dependência
+* organização
+* facilidade de manutenção
+* escalabilidade
+
+---
+
+## MongoDB
 
 MongoDB foi utilizado devido à flexibilidade no armazenamento de payloads dinâmicos de webhooks.
 
-Prisma
+---
+
+## Prisma
 
 Prisma foi utilizado para simplificar o acesso ao banco de dados, oferecendo:
 
-tipagem forte
-melhor experiência de desenvolvimento
-queries mais organizadas
-facilidade de manutenção
-Logs
+* tipagem forte
+* melhor experiência de desenvolvimento
+* queries mais organizadas
+* facilidade de manutenção
+
+---
+
+# Logs
 
 A aplicação utiliza Winston para logging estruturado.
 
 Os logs incluem:
 
-inicialização da aplicação
-conexão com banco
-erros
-requisições importantes
-Tratamento de erros
+* inicialização da aplicação
+* conexão com banco
+* erros
+* requisições importantes
 
-A aplicação possui tratamento centralizado de erros para evitar vazamento de informações internas e manter respostas padronizadas.
+---
 
-Escalabilidade
+# Tratamento de erros
+
+A aplicação possui tratamento centralizado de erros para:
+
+* evitar vazamento de informações internas
+* manter respostas padronizadas
+* facilitar debugging e observabilidade
+
+---
+
+# Escalabilidade
 
 Em cenários futuros de maior volume, seria possível adicionar:
 
-filas
-processamento assíncrono
-retries
-rate limiting
-observabilidade distribuída
+* filas
+* processamento assíncrono
+* retries
+* rate limiting
+* observabilidade distribuída
 
-Evoluções futuras
+---
+
+# Evoluções futuras
 
 Possíveis melhorias:
 
-autenticação de webhooks
-idempotência
-DLQ (dead letter queue)
-métricas
-tracing
-documentação Swagger
-retries automáticos
+* autenticação de webhooks
+* idempotência
+* DLQ (Dead Letter Queue)
+* métricas
+* tracing
+* documentação Swagger
+* retries automáticos
 
-Executando testes
+---
+
+# Executando testes
+
+```bash
 pnpm run test:e2e
-Considerações finais
+```
 
-O foco principal foi construir uma base simples, organizada e preparada para crescimento futuro, priorizando clareza arquitetural e facilidade de manutenção.
+---
+
+# Considerações finais
+
+O foco principal foi construir uma base simples, organizada e preparada para crescimento futuro, priorizando:
+
+* clareza arquitetural
+* facilidade de manutenção
+* separação de responsabilidades
+* escalabilidade
+* legibilidade do código
