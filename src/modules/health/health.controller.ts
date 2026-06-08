@@ -1,12 +1,13 @@
 import { Controller, Get, HttpCode, HttpStatus } from '@nestjs/common';
-@Controller('health')
+import { HealthService } from '@/modules/health/health.service';
+
+@Controller()
 export class HealthController {
-  constructor() {}
+  constructor(private readonly healthService: HealthService) {}
+
   @Get('health')
   @HttpCode(HttpStatus.OK)
   check() {
-    return {
-      status: 'ok',
-    };
+    return this.healthService.check();
   }
 }
