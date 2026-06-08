@@ -1,98 +1,167 @@
-<p align="center">
-  <a href="http://nestjs.com/" target="blank"><img src="https://nestjs.com/img/logo-small.svg" width="120" alt="Nest Logo" /></a>
-</p>
+Webhook Receiver Service
 
-[circleci-image]: https://img.shields.io/circleci/build/github/nestjs/nest/master?token=abc123def456
-[circleci-url]: https://circleci.com/gh/nestjs/nest
+Serviço backend desenvolvido com NestJS + TypeScript para recebimento de webhooks públicos e persistência de eventos em MongoDB.
 
-  <p align="center">A progressive <a href="http://nodejs.org" target="_blank">Node.js</a> framework for building efficient and scalable server-side applications.</p>
-    <p align="center">
-<a href="https://www.npmjs.com/~nestjscore" target="_blank"><img src="https://img.shields.io/npm/v/@nestjs/core.svg" alt="NPM Version" /></a>
-<a href="https://www.npmjs.com/~nestjscore" target="_blank"><img src="https://img.shields.io/npm/l/@nestjs/core.svg" alt="Package License" /></a>
-<a href="https://www.npmjs.com/~nestjscore" target="_blank"><img src="https://img.shields.io/npm/dm/@nestjs/common.svg" alt="NPM Downloads" /></a>
-<a href="https://circleci.com/gh/nestjs/nest" target="_blank"><img src="https://img.shields.io/circleci/build/github/nestjs/nest/master" alt="CircleCI" /></a>
-<a href="https://discord.gg/G7Qnnhy" target="_blank"><img src="https://img.shields.io/badge/discord-online-brightgreen.svg" alt="Discord"/></a>
-<a href="https://opencollective.com/nest#backer" target="_blank"><img src="https://opencollective.com/nest/backers/badge.svg" alt="Backers on Open Collective" /></a>
-<a href="https://opencollective.com/nest#sponsor" target="_blank"><img src="https://opencollective.com/nest/sponsors/badge.svg" alt="Sponsors on Open Collective" /></a>
-  <a href="https://paypal.me/kamilmysliwiec" target="_blank"><img src="https://img.shields.io/badge/Donate-PayPal-ff3f59.svg" alt="Donate us"/></a>
-    <a href="https://opencollective.com/nest#sponsor"  target="_blank"><img src="https://img.shields.io/badge/Support%20us-Open%20Collective-41B883.svg" alt="Support us"></a>
-  <a href="https://twitter.com/nestframework" target="_blank"><img src="https://img.shields.io/twitter/follow/nestframework.svg?style=social&label=Follow" alt="Follow us on Twitter"></a>
-</p>
-  <!--[![Backers on Open Collective](https://opencollective.com/nest/backers/badge.svg)](https://opencollective.com/nest#backer)
-  [![Sponsors on Open Collective](https://opencollective.com/nest/sponsors/badge.svg)](https://opencollective.com/nest#sponsor)-->
+Tecnologias utilizadas
+Node.js
+TypeScript
+NestJS
+Prisma
+MongoDB
+Docker Compose
+Winston
+Objetivo
 
-## Description
+A aplicação recebe eventos externos através de webhooks públicos e armazena os dados para posterior processamento.
 
-[Nest](https://github.com/nestjs/nest) framework TypeScript starter repository.
+O projeto foi estruturado pensando em:
 
-## Project setup
+organização
+manutenção
+escalabilidade
+legibilidade
+simplicidade
+Estrutura do projeto
+src/
+├── common/
+├── modules/
+│   ├── health/
+│   │   ├── health.controller.ts
+│   │   ├── health.module.ts
+│   │   └── health.service.ts
+│   │
+│   └── webhooks/
+│       ├── constants/
+│       ├── webhooks.controller.ts
+│       ├── webhooks.module.ts
+│       └── webhooks.service.ts
+│
+├── app.module.ts
+└── main.ts
 
-```bash
-$ pnpm install
-```
+prisma/
+└── schema.prisma
+Como executar o projeto
+Pré-requisitos
+Docker
+Docker Compose
+Node.js
+Variáveis de ambiente
 
-## Compile and run the project
+Criar um arquivo .env:
 
-```bash
-# development
-$ pnpm run start
+PORT=3000
 
-# watch mode
-$ pnpm run start:dev
+DATABASE_URL=mongodb://admin:admin@localhost:27017/webhooks?authSource=admin
+Subindo o MongoDB
+docker compose up -d
+Instalando dependências
+pnpm install
+Gerando o Prisma Client
+npx prisma generate
+Executando a aplicação
+pnpm run start:dev
 
-# production mode
-$ pnpm run start:prod
-```
+Aplicação disponível em:
 
-## Run tests
+http://localhost:3000
+Endpoints
+Receber webhook
+POST /webhooks/:source
 
-```bash
-# unit tests
-$ pnpm run test
+Exemplo:
 
-# e2e tests
-$ pnpm run test:e2e
+POST /webhooks/shopify
 
-# test coverage
-$ pnpm run test:cov
-```
+Payload:
 
-## Deployment
+{
+  "event": "order.created",
+  "data": {
+    "id": 123
+  }
+}
+Health Check
+GET /health
 
-When you're ready to deploy your NestJS application to production, there are some key steps you can take to ensure it runs as efficiently as possible. Check out the [deployment documentation](https://docs.nestjs.com/deployment) for more information.
+Retorna:
 
-If you are looking for a cloud-based platform to deploy your NestJS application, check out [Mau](https://mau.nestjs.com), our official platform for deploying NestJS applications on AWS. Mau makes deployment straightforward and fast, requiring just a few simple steps:
+status da aplicação
+status da conexão com MongoDB
+timestamp
+Estrutura do evento salvo
 
-```bash
-$ pnpm install -g @nestjs/mau
-$ mau deploy
-```
+Exemplo:
 
-With Mau, you can deploy your application in just a few clicks, allowing you to focus on building features rather than managing infrastructure.
+{
+  "id": "uuid",
+  "source": "shopify",
+  "payload": {},
+  "headers": {},
+  "receivedAt": "2026-06-08T00:00:00.000Z",
+  "status": "processed",
+  "errorMessage": null
+}
+Decisões técnicas
+NestJS
 
-## Resources
+NestJS foi escolhido por oferecer:
 
-Check out a few resources that may come in handy when working with NestJS:
+arquitetura modular
+injeção de dependência
+organização
+facilidade de manutenção
+escalabilidade
+MongoDB
 
-- Visit the [NestJS Documentation](https://docs.nestjs.com) to learn more about the framework.
-- For questions and support, please visit our [Discord channel](https://discord.gg/G7Qnnhy).
-- To dive deeper and get more hands-on experience, check out our official video [courses](https://courses.nestjs.com/).
-- Deploy your application to AWS with the help of [NestJS Mau](https://mau.nestjs.com) in just a few clicks.
-- Visualize your application graph and interact with the NestJS application in real-time using [NestJS Devtools](https://devtools.nestjs.com).
-- Need help with your project (part-time to full-time)? Check out our official [enterprise support](https://enterprise.nestjs.com).
-- To stay in the loop and get updates, follow us on [X](https://x.com/nestframework) and [LinkedIn](https://linkedin.com/company/nestjs).
-- Looking for a job, or have a job to offer? Check out our official [Jobs board](https://jobs.nestjs.com).
+MongoDB foi utilizado devido à flexibilidade no armazenamento de payloads dinâmicos de webhooks.
 
-## Support
+Prisma
 
-Nest is an MIT-licensed open source project. It can grow thanks to the sponsors and support by the amazing backers. If you'd like to join them, please [read more here](https://docs.nestjs.com/support).
+Prisma foi utilizado para simplificar o acesso ao banco de dados, oferecendo:
 
-## Stay in touch
+tipagem forte
+melhor experiência de desenvolvimento
+queries mais organizadas
+facilidade de manutenção
+Logs
 
-- Author - [Kamil Myśliwiec](https://twitter.com/kammysliwiec)
-- Website - [https://nestjs.com](https://nestjs.com/)
-- Twitter - [@nestframework](https://twitter.com/nestframework)
+A aplicação utiliza Winston para logging estruturado.
 
-## License
+Os logs incluem:
 
-Nest is [MIT licensed](https://github.com/nestjs/nest/blob/master/LICENSE).
+inicialização da aplicação
+conexão com banco
+erros
+requisições importantes
+Tratamento de erros
+
+A aplicação possui tratamento centralizado de erros para evitar vazamento de informações internas e manter respostas padronizadas.
+
+Escalabilidade
+
+Em cenários futuros de maior volume, seria possível adicionar:
+
+filas
+processamento assíncrono
+retries
+rate limiting
+observabilidade distribuída
+
+Evoluções futuras
+
+Possíveis melhorias:
+
+autenticação de webhooks
+idempotência
+DLQ (dead letter queue)
+métricas
+tracing
+documentação Swagger
+retries automáticos
+
+Executando testes
+pnpm run test:e2e
+Considerações finais
+
+O foco principal foi construir uma base simples, organizada e preparada para crescimento futuro, priorizando clareza arquitetural e facilidade de manutenção.
