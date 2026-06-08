@@ -81,6 +81,19 @@ DATABASE_URL="mongodb://admin:admin@localhost:27017/webhooks?authSource=admin&re
 
 # Subindo o MongoDB
 
+O Docker Compose sobe dois containers:
+
+* mongodb — instância MongoDB com replica set
+* mongo-init — container auxiliar que inicializa o replica set automaticamente (executa rs.initiate() e encerra)
+
+Para subir tudo de uma vez (MongoDB + replica set + Prisma schema):
+
+```bash
+pnpm db:setup
+```
+
+Ou manualmente:
+
 ```bash
 docker compose up -d
 ```
