@@ -14,7 +14,7 @@ export class WebhooksController {
   constructor(private readonly webhooksService: WebhooksService) {}
 
   @Post(':source')
-  @HttpCode(HttpStatus.ACCEPTED)
+  @HttpCode(HttpStatus.CREATED)
   async receive(
     @Param('source') source: string,
     @Body() payload: unknown,
