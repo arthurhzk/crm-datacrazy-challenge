@@ -74,7 +74,7 @@ Crie um arquivo `.env` na raiz do projeto:
 ```env
 PORT=3000
 
-DATABASE_URL="mongodb://admin:admin@localhost:27017/webhooks?authSource=admin"
+DATABASE_URL="mongodb://admin:admin@localhost:27017/webhooks?authSource=admin&replicaSet=rs0"
 ```
 
 ---
