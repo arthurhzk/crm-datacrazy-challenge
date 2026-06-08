@@ -1,0 +1,20 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "mongodb"
+  url      = env("DATABASE_URL")
+}
+
+model WebhookEvent {
+  id            String   @id @default(auto()) @map("_id") @db.ObjectId
+  source        String
+  payload       Json
+  headers       Json
+  receivedAt    DateTime @default(now())
+  status        String
+  errorMessage  String?
+
+  @@map("webhook_events")
+}
