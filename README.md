@@ -11,6 +11,7 @@ Serviço backend desenvolvido com **NestJS + TypeScript** para recebimento de we
 * NestJS
 * Prisma
 * MongoDB
+* Redis
 * Docker Compose
 * Winston
 
@@ -20,7 +21,7 @@ Serviço backend desenvolvido com **NestJS + TypeScript** para recebimento de we
 
 A aplicação recebe eventos externos através de webhooks públicos e armazena os dados para posterior processamento.
 
-O projeto foi estruturado pensando em:
+O projeto foi estruturado com foco em:
 
 * organização
 * manutenção
@@ -79,14 +80,14 @@ DATABASE_URL="mongodb://admin:admin@localhost:27017/webhooks?authSource=admin&re
 
 ---
 
-# Subindo o MongoDB
+# Subindo o ambiente
 
-O Docker Compose sobe dois containers:
+O Docker Compose sobe os seguintes containers:
 
-* mongodb — instância MongoDB com replica set
-* mongo-init — container auxiliar que inicializa o replica set automaticamente (executa rs.initiate() e encerra)
+* MongoDB
+* Inicializador automático do Replica Set
 
-Para subir tudo de uma vez (MongoDB + replica set + Prisma schema):
+Para subir toda a infraestrutura:
 
 ```bash
 pnpm db:setup
@@ -100,15 +101,15 @@ docker compose up -d
 
 ---
 
-# Instalando dependências
+# Instalação
+
+## Instalar dependências
 
 ```bash
 pnpm install
 ```
 
----
-
-# Gerando o Prisma Client
+## Gerar Prisma Client
 
 ```bash
 npx prisma generate
@@ -171,9 +172,9 @@ GET /health
 
 ---
 
-# Estrutura do evento salvo
+# Estrutura do evento persistido
 
-Exemplo de documento persistido no MongoDB:
+Exemplo de documento salvo no MongoDB:
 
 ```json
 {
@@ -205,7 +206,7 @@ O NestJS foi escolhido por oferecer:
 
 ## MongoDB
 
-MongoDB foi utilizado devido à flexibilidade no armazenamento de payloads dinâmicos de webhooks.
+MongoDB foi utilizado devido à flexibilidade para armazenamento de payloads dinâmicos de webhooks.
 
 ---
 
@@ -215,7 +216,7 @@ Prisma foi utilizado para simplificar o acesso ao banco de dados, oferecendo:
 
 * tipagem forte
 * melhor experiência de desenvolvimento
-* queries mais organizadas
+* queries organizadas
 * facilidade de manutenção
 
 ---
@@ -227,7 +228,7 @@ A aplicação utiliza Winston para logging estruturado.
 Os logs incluem:
 
 * inicialização da aplicação
-* conexão com banco
+* conexão com banco de dados
 * erros
 * requisições importantes
 
@@ -239,19 +240,64 @@ A aplicação possui tratamento centralizado de erros para:
 
 * evitar vazamento de informações internas
 * manter respostas padronizadas
-* facilitar debugging e observabilidade
+* facilitar debugging
+* melhorar observabilidade
 
 ---
 
 # Escalabilidade
 
-Em cenários futuros de maior volume, seria possível adicionar:
+A arquitetura foi pensada para suportar crescimento futuro.
 
-* filas
-* processamento assíncrono
-* retries
-* rate limiting
-* observabilidade distribuída
+## Load Balancer
+
+Em ambientes com múltiplas instâncias da aplicação, um Load Balancer pode distribuir o tráfego entre os serviços.
+
+### Topologia sugerida
+
+```text
+Internet
+    │
+    ▼
+[ Load Balancer ]
+(NGINX / AWS ALB / Traefik)
+    │
+    ├── Instância 1 (NestJS)
+    ├── Instância 2 (NestJS)
+    └── Instância N (NestJS)
+            │
+            ├── MongoDB Replica Set
+            └── Redis
+```
+
+---
+
+## Cache
+
+Redis pode ser utilizado como camada de cache para reduzir carga no banco de dados e melhorar latência.
+
+### Estratégia adotada — Cache Aside
+
+```text
+Request
+   │
+   ├── Cache HIT  → retorna Redis
+   └── Cache MISS → consulta MongoDB
+                         │
+                         └── salva no Redis
+```
+
+---
+
+## Observabilidade
+
+Em produção, observabilidade é essencial para monitoramento e troubleshooting.
+
+### Stack sugerida
+
+* ELK Stack (Elasticsearch + Logstash + Kibana)
+* Winston para logs estruturados
+* métricas e tracing distribuído
 
 ---
 
@@ -261,11 +307,13 @@ Possíveis melhorias:
 
 * autenticação de webhooks
 * idempotência
-* DLQ (Dead Letter Queue)
-* métricas
-* tracing
-* documentação Swagger
+* filas
 * retries automáticos
+* DLQ (Dead Letter Queue)
+* rate limiting
+* métricas
+* tracing distribuído
+* documentação Swagger
 
 ---
 
@@ -282,7 +330,8 @@ pnpm run test:e2e
 O foco principal foi construir uma base simples, organizada e preparada para crescimento futuro, priorizando:
 
 * clareza arquitetural
-* facilidade de manutenção
 * separação de responsabilidades
+* facilidade de manutenção
 * escalabilidade
 * legibilidade do código
+* simplicidade na evolução do projeto
